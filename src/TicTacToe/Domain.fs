@@ -1,13 +1,11 @@
 ﻿namespace TicTacToe 
 
 module Domain =
-    type Player = 
-        | PlayerX
-        | PlayerO
+    type Player = PlayerX | PlayerO
     
     type HorizontalPosition = Left | Center | Right
-    type VerticalPosition   = Top  | Middle | Bottom
-    type CellPosition       = HorizontalPosition * VerticalPosition
+    type VerticalPosition = Top | Middle | Bottom
+    type CellPosition = HorizontalPosition * VerticalPosition
 
     type CellState = 
         | Played of Player
@@ -15,24 +13,24 @@ module Domain =
 
     type Cell = {
         position: CellPosition
-        state:    CellState
+        state: CellState
     }
 
     type DisplayInfo = {
         cells: Cell list 
     }
 
-    type MoveCapability = unit -> MoveResult
-    and NextMoveInfo = {
+    type Move = unit -> MoveResult
+    and NextPossibleMove = {
         positionToPlay: CellPosition
-        capability:     MoveCapability
+        capability: Move
     }
     and MoveResult = 
-        | PlayerXToMove of DisplayInfo * NextMoveInfo list
-        | PlayerOToMove of DisplayInfo * NextMoveInfo list
-        | GameWon       of DisplayInfo * Player
-        | GameTied      of DisplayInfo
+        | PlayerXToMove of DisplayInfo * (NextPossibleMove list)
+        | PlayerOToMove of DisplayInfo * (NextPossibleMove list)
+        | GameWon of DisplayInfo * Player
+        | GameTied of DisplayInfo
 
-    type TicTacToeApi = {
-        newGame: MoveCapability
+    type Api = {
+        newGame: Move
     }

@@ -10,34 +10,34 @@ module ConsoleUi =
 
     let displayNextMoves nextMoves = 
         nextMoves 
-        |> List.iteri (fun i moveInfo -> printfn "%i) %A" i moveInfo)
+        |> List.iteri (fun i moveInfo -> printfn "%i) %A" i moveInfo.positionToPlay)
 
     let getCapability selectedIndex nextMoves =
         if selectedIndex < List.length nextMoves then
-            let move = List.nth nextMoves selectedIndex
+            let move = nextMoves.[selectedIndex]
             Some move.capability
         else
             None
 
-    let processMoveIndex inputString availableMoves processInputAgain =
+    let processMoveIndex inputString availableCapabilities processInputAgain =
         match Int32.TryParse inputString with
-        | true, inputIndex -> 
-            match getCapability inputIndex availableMoves with
+        | (true, inputIndex) -> 
+            match getCapability inputIndex availableCapabilities with
             | Some capability ->
                 let moveResult = capability()
                 ContinuePlay moveResult
             | None ->
-                printfn "No move found with that index. Try again."
+                printfn "No move found with that index. Please try again."
                 processInputAgain()
-        | false, _ ->
-            printfn "Please enter an int corresponding to a displayed move"
+        | (false, _) ->
+            printfn "Please enter an integer that represents a valid move index."
             processInputAgain()
 
     let rec processInput availableCapabilities = 
         let processInputAgain() =
             processInput availableCapabilities
 
-        printfn "Enter an int corresponding to a displayed move or q to quit"
+        printfn "Enter an integer corresponding to a displayed move or q to quit."
         let inputString = Console.ReadLine()
         match inputString with
         | "q" -> ExitGame
@@ -50,8 +50,8 @@ module ConsoleUi =
             | Empty -> "-"
             | Played player ->
                 match player with
-                | PlayerO -> "O"
                 | PlayerX -> "X"
+                | PlayerO -> "O"
         
         let printCells cells =
             cells
@@ -59,16 +59,12 @@ module ConsoleUi =
             |> List.reduce (fun s1 s2 -> s1 + "|" + s2)
             |> printfn "|%s|"
 
-        let topCells = 
-            cells |> List.filter (fun cell -> snd cell.position = Top)
-        let middleCells =
-            cells |> List.filter (fun cell -> snd cell.position = Middle)
-        let bottomCells =
-            cells |> List.filter (fun cell -> snd cell.position = Bottom)
+        let getRowOfCells verticalPosition =
+            cells |> List.filter (fun cell -> snd cell.position = verticalPosition)
 
-        printCells topCells
-        printCells middleCells
-        printCells bottomCells
+        printCells (getRowOfCells Top)
+        printCells (getRowOfCells Middle)
+        printCells (getRowOfCells Bottom)
 
     let rec askToPlayAgain api = 
         printfn "Would you like to play again (y/n)?"
@@ -78,11 +74,9 @@ module ConsoleUi =
         | _ -> askToPlayAgain api
 
     let rec gameLoop api userAction =
-        printfn "\n------------------------------\n"
-
         match userAction with
         | ExitGame ->
-            printfn "Exiting game."
+            printfn "Exiting game..."
         | ContinuePlay moveResult ->
             match moveResult with
             | GameTied displayInfo ->

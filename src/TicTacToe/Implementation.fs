@@ -13,21 +13,20 @@ module Implementation =
     type Line = Line of CellPosition list
 
     let linesToCheck = 
-        let makeHorizontalLine v = Line [for h in allHorizontalPositions -> (h,v)]
-        let horizontalLines = [for v in allVerticalPositions -> makeHorizontalLine v]
+        let makeHorizontalLine y = Line [for x in allHorizontalPositions -> (x,y)]
+        let horizontalLines = [for vertical in allVerticalPositions -> makeHorizontalLine vertical]
 
-        let makeVerticalLine h = Line [for v in allVerticalPositions -> (h,v)]
-        let verticalLines = [for h in allHorizontalPositions -> makeVerticalLine h]
-
-
-        let diagonalLine1 = Line[Left,Top; Center,Middle; Right,Bottom]
-        let diagonalLine2 = Line[Left,Bottom; Center,Middle; Right,Top]
+        let makeVerticalLine x = Line [for y in allVerticalPositions -> (x,y)]
+        let verticalLines = [for horizontal in allHorizontalPositions -> makeVerticalLine horizontal]
+        
+        let baroqueDiagonal = Line[(Left,Bottom); (Center,Middle); (Right,Top)]
+        let sinisterDiagonal = Line[(Left,Top); (Center,Middle); (Right,Bottom)]
 
         [
             yield! horizontalLines
             yield! verticalLines
-            yield  diagonalLine1
-            yield  diagonalLine2
+            yield  baroqueDiagonal
+            yield  sinisterDiagonal
         ]
 
     let getDisplayInfo gameState =
@@ -44,7 +43,7 @@ module Implementation =
             else 
                 oldCell
 
-        let newCells = gameState.cells |> List.map substituteNewCell 
+        let newCells = gameState.cells |> List.map substituteNewCell
 
         { gameState with cells = newCells }
 
@@ -74,7 +73,7 @@ module Implementation =
     let private remainingMoves gameState =
         let playableCell cell = 
             match cell.state with
-            | Played player -> None
+            | Played _ -> None
             | Empty -> Some cell.position
 
         gameState.cells
@@ -119,9 +118,8 @@ module Implementation =
 
     let newGame() =
         let allPositions = [
-            for h in allHorizontalPositions do
-            for v in allVerticalPositions do 
-                yield (h,v)
+            for x in allHorizontalPositions do
+            for y in allVerticalPositions -> (x,y)
         ]
 
         let emptyCells = 

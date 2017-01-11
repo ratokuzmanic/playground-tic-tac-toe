@@ -1,6 +1,6 @@
 ﻿open System
 
-module ConsoleApplication = 
+module Application = 
     open TicTacToe.Implementation
     open TicTacToe.ConsoleUi
 
@@ -8,4 +8,4 @@ module ConsoleApplication =
         let api = TicTacToe.Implementation.api
         TicTacToe.ConsoleUi.startGame api
 
-ConsoleApplication.startGame()
+Application.startGame()
